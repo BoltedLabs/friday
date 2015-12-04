@@ -4,16 +4,16 @@
 
 #include "assets.h"
 
-#define FRIDAY		5
+#define FRIDAY			5
 
 int		serve_index(struct http_request *);
 
 int
 serve_index(struct http_request *req)
 {
-	u_int8_t			*d;
-	struct kore_buf		*b;
-	u_int32_t			len;
+	u_int8_t				*d;
+	struct kore_buf			*b;
+	u_int32_t				len;
 
 	b = kore_buf_create(asset_len_index_html);
 	kore_buf_append(b, asset_index_html, asset_len_index_html);

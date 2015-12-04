@@ -1,1 +1,1 @@
-Wanted to try out [KORE](kore.io), and I like Fridays!
+Wanted to try out [KORE](https://kore.io), and I like Fridays!
