@@ -1,0 +1,1 @@
+Wanted to try out [KORE](kore.io), and I like Fridays!

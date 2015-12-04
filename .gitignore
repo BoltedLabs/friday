@@ -1,0 +1,5 @@
+*.o
+.objs
+friday.so
+assets.h
+cert
