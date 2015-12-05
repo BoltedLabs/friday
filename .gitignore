@@ -3,3 +3,5 @@
 friday.so
 assets.h
 cert
+conf/friday-prod.conf
+kore.pid
