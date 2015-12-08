@@ -7,6 +7,34 @@
 #define FRIDAY			5
 
 int		serve_index(struct http_request *);
+int		serve_skeleton_css(struct http_request *);
+
+// Serve skeleton css framework
+int
+serve_skeleton_css(struct http_request *req)
+{
+	char		*date;
+	time_t		tstamp;
+
+	tstamp = 0;
+	if (http_request_header(req, "if-modified-since", &date)) {
+		tstamp = kore_date_to_time(date);
+		kore_debug("header was present with %ld", tstamp);
+	}
+
+	if (tstamp != 0 && tstamp <= asset_mtime_skeleton_css) {
+		http_response(req, 304, NULL, 0);
+	} else {
+		date = kore_time_to_date(asset_mtime_skeleton_css);
+		if (date != NULL)
+			http_response_header(req, "last-modified", date);
+
+		http_response_header(req, "content-type", "text/css");
+		http_response(req, 200, asset_skeleton_css, asset_len_skeleton_css);
+	}
+
+	return (KORE_RESULT_OK);
+}
 
 int
 serve_index(struct http_request *req)
