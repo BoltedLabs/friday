@@ -5,3 +5,6 @@ assets.h
 cert
 conf/friday-prod.conf
 kore.pid
+.env.fish
+.env
+.venv
