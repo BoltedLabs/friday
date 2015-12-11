@@ -1,36 +1,32 @@
 #include <kore/kore.h>
 #include <kore/http.h>
 #include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "assets.h"
 
 #define FRIDAY			5
 
 int		serve_index(struct http_request *);
-int		serve_skeleton_css(struct http_request *);
+int		serve_css(struct http_request *);
+char*	read_file(char [], long *);
 
-// Serve skeleton css framework
 int
-serve_skeleton_css(struct http_request *req)
+serve_css(struct http_request *req)
 {
-	char		*date;
-	time_t		tstamp;
+	// Read requested file, if not found return 404.
+	char *static_path = getenv("static_path");
+	char filename[255];
+	sprintf(filename, "%s%s", static_path, req->path);
+	long asset_len_css;
+	char *asset_css = read_file(filename, &asset_len_css);
 
-	tstamp = 0;
-	if (http_request_header(req, "if-modified-since", &date)) {
-		tstamp = kore_date_to_time(date);
-		kore_debug("header was present with %ld", tstamp);
-	}
-
-	if (tstamp != 0 && tstamp <= asset_mtime_skeleton_css) {
-		http_response(req, 304, NULL, 0);
+	if (asset_css == NULL) {
+		http_response(req, 404, NULL, 0);
 	} else {
-		date = kore_time_to_date(asset_mtime_skeleton_css);
-		if (date != NULL)
-			http_response_header(req, "last-modified", date);
-
 		http_response_header(req, "content-type", "text/css");
-		http_response(req, 200, asset_skeleton_css, asset_len_skeleton_css);
+		http_response(req, 200, asset_css, asset_len_css);
 	}
 
 	return (KORE_RESULT_OK);
@@ -86,4 +82,29 @@ serve_index(struct http_request *req)
 	kore_mem_free(d);
 
 	return (KORE_RESULT_OK);
+}
+
+char*
+read_file(char filename[255], long *filesize)
+{
+	FILE	*fp = fopen(filename, "r");
+	char	*contents = NULL;
+	long	size;
+
+	if (fp == NULL) {
+		printf("File `%s` not found.\n", filename);
+		return NULL;
+	}
+
+	fseek(fp, 0, SEEK_END);
+	size = ftell(fp);
+	rewind(fp);
+	contents = malloc(size * (sizeof(char)));
+	fread(contents, sizeof(char), size, fp);
+	
+	fclose(fp);
+
+	*filesize = size;
+
+	return contents;
 }
