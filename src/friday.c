@@ -17,7 +17,7 @@ char*	read_file(char [], long *, time_t *);
 int
 serve_css(struct http_request *req)
 {
-	char				*static_path = getenv("static_path");
+	char				*static_path = getenv("STATIC_PATH");
 	char				filename[255];
 	long				asset_len_css;
 	time_t				asset_mtime_css;
