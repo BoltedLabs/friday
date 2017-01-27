@@ -25,13 +25,13 @@ serve_css(struct http_request *req)
 	// Read requested file, if not found return 404.
 	sprintf(filename, "%s%s", static_path, req->path);
 	char *asset_css = read_file(filename, &asset_len_css, &asset_mtime_css);
-	
+
 	if (asset_css == NULL) {
 		http_response(req, 404, NULL, 0);
 	} else {
 		char		*date;
 		time_t		tstamp = 0;
-		
+
 		if (http_request_header(req, "if-modified-since", &date)) {
 			tstamp = kore_date_to_time(date);
 		}
@@ -56,11 +56,11 @@ serve_css(struct http_request *req)
 int
 serve_index(struct http_request *req)
 {
-	u_int8_t				*d;
-	struct kore_buf			*b;
-	u_int32_t				len;
+	u_int8_t		*d;
+	struct kore_buf *b;
+	size_t 			len;
 
-	b = kore_buf_create(asset_len_index_html);
+	b = kore_buf_alloc(asset_len_index_html);
 	kore_buf_append(b, asset_index_html, asset_len_index_html);
 
 	time_t rt = time(NULL);
@@ -70,8 +70,8 @@ serve_index(struct http_request *req)
 	if (lt->tm_wday == FRIDAY) {
 		kore_buf_replace_string(b, "$content$", asset_friday_html, asset_len_friday_html);
 	} else {
-		u_int32_t nlen;
-		struct kore_buf *nb = kore_buf_create(asset_len_notday_html);
+		size_t nlen;
+		struct kore_buf *nb = kore_buf_alloc(asset_len_notday_html);
 		kore_buf_append(nb, asset_notday_html, asset_len_notday_html);
 
 		// Calculate number of days left.
@@ -93,14 +93,13 @@ serve_index(struct http_request *req)
 		u_int8_t *nd = kore_buf_release(nb,  &nlen);
 
 		kore_buf_replace_string(b, "$content$", nd, nlen);
-		kore_mem_free(nd);
+		kore_free(nd);
 	}
 
-	d = kore_buf_release(b, &len);
-
 	http_response_header(req, "content-type", "text/html");
+	d = kore_buf_release(b, &len);
 	http_response(req, 200, d, len);
-	kore_mem_free(d);
+	kore_free(d);
 
 	return (KORE_RESULT_OK);
 }
@@ -123,11 +122,11 @@ read_file(char filename[255], long *filesize, time_t *lmd)
 	rewind(fp);
 	contents = malloc(size * (sizeof(char)));
 	fread(contents, sizeof(char), size, fp);
-	
+
 	fclose(fp);
 
 	stat(filename, &attr);
-	
+
 	// Set stat pointers.
 	*filesize = size;
 	*lmd = attr.st_mtime;
